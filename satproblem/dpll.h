@@ -8,6 +8,8 @@
 #include <string.h>
 #include <time.h>
 
+void IndexSort(Listheadp L);
+bool CnfRead(char filename[], Listheadp L);
 bool dpll(Vexheadp p, int index, int indexsig);
 int IfExistSingleVex(Vexheadp p, int &sig);
 void Simplify(Vexheadp p, int IfSingleIndex, int sig);
@@ -16,7 +18,10 @@ int IfEmpty(Vexheadp p);
 void PutOut(Vexheadp p);
 void FreeMemory(Memoryp mmy);
 void SaveResult(char filename[], Listheadp L, long time);
-void CnfRead(char filename[], Listheadp L)
+
+
+
+bool CnfRead(char filename[], Listheadp L)
 {
 	FILE *fp;
 	int i,j,k, bool_num, line_num, TempIndex;
@@ -27,6 +32,7 @@ void CnfRead(char filename[], Listheadp L)
 	Vexp q, q1;
 	if ((fp = fopen(filename, "rb")) == NULL) {
 		printf("File open error.\n");
+		return false;
 	}
 	else
 	{
@@ -104,7 +110,28 @@ void CnfRead(char filename[], Listheadp L)
 	}
 	fclose(fp);
 }
-
+void IndexSort(Listheadp L)
+{
+	int choosei, choosej;
+	chooseList tempchoose;
+	for (choosei = 0; choosei < L->BoolNum - 1; choosei++)
+		for (choosej = 0; choosej < L->BoolNum - 1 - choosei; choosej++)
+		{
+			if ((Choose + choosej)->num < (Choose + choosej + 1)->num)
+			{
+				tempchoose.index = (Choose + choosej + 1)->index;
+				tempchoose.num = (Choose + choosej + 1)->num;
+				//tempchoose.sig = (Choose + choosej + 1)->sig;
+				(Choose + choosej + 1)->index = (Choose + choosej)->index;
+				(Choose + choosej + 1)->num = (Choose + choosej)->num;
+				//(Choose + choosej + 1)->sig = (Choose + choosej)->sig;
+				(Choose + choosej)->index = tempchoose.index;
+				(Choose + choosej)->num = tempchoose.num;
+				//(Choose + choosej)->sig = tempchoose.sig;
+			}
+		}
+	//for (choosei = 0; choosei < L->BoolNum; choosei++) printf("%d:%d\t", (Choose + choosei)->index, (Choose + choosei)->num);
+}
 bool dpll(Vexheadp p, int index, int indexsig)
 {
 	int IfSingleIndex;

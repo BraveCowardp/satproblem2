@@ -74,88 +74,12 @@ int main()
 	Vexheadp p, p1;
 	Vexp q,q1;
 	CnfRead(filename, L);
+
 	//bool IfPCnf = false;
 	//printf("input file name:");
 	//scanf("%s", filename, 50);
-	/*if ((fp = fopen(filename, "rb")) == NULL) {
-		printf("File open error.\n");
-	}
-	else
-	{
-		while (!feof(fp))
-		{
-			for (i = 0;i<199; i++)
-			{
-				fread(&ch, sizeof(char), 1, fp);
-				
-				if (ch != '\r') readline[i] = ch;
-				else i--;
-				if (readline[i] == '\n')
-				{
-					i++;
-					break;
-				}
-
-			}
-			readline[i] = '\0';
-			if (IfPCnf && j <= L->LineNum)
-			{
-				p = (Vexheadp)malloc(sizeof(Vexhead));
-				p->WhichLine = j++;
-				p->status = exist;
-				p->vexnum = 0;
-				p->NextLine = NULL;
-				k = 0;
-				while (true)
-				{
-					TempIndex = atoi(readline + k);
-					if (TempIndex == 0) break;
-					q = (Vexp)malloc(sizeof(Vex));
-					q->status = exist;
-					q->NextVexp = NULL;
-					p->vexnum++;
-					if (TempIndex < 0)
-					{
-						q->index = -TempIndex;
-						q->sig = -1;
-					}
-					else
-					{			
-						q->index = TempIndex;
-						q->sig = 1;						
-					}
-					if (k != 0)q1->NextVexp = q;
-					else p->FirstVex = q;
-					q->NextVexp = NULL;
-					q1 = q;
-					while (true)
-					{
-						k++;
-						if (readline[k] == ' ') break;
-					}
-				}
-				if (p->WhichLine != 1)p1->NextLine = p;
-				else L->VexList = p;
-				p->NextLine = NULL;
-				p1 = p;
-				
-			}
-			if (!strncmp(parameter, readline, 5))
-			{
-				bool_num = atoi(readline + 5);
-				for (j = 0; readline[6+j] != ' '; j++);
-				line_num = atoi(readline + 6 + j);
-				IfPCnf = true;
-				j = 1;
-				L->BoolNum = bool_num;
-				L->LineNum = line_num;
-				
-			}
-			
-		}
-	}
-	fclose(fp);*/
-	Choose = (chooseList*)malloc(2 * L->BoolNum * sizeof(chooseList));
+	
+	Choose = (chooseList*)malloc(L->BoolNum * sizeof(chooseList));
 	for (choosei = 0; choosei < L->BoolNum; choosei++)
 	{
 		(Choose + choosei)->index = choosei + 1;
@@ -180,23 +104,7 @@ int main()
 		printf("\n");
 		p = p->NextLine;
 	}
-	for(choosei = 0; choosei< L->BoolNum-1; choosei++)
-		for (choosej = 0; choosej < L->BoolNum - 1 - choosei; choosej++)
-		{
-			if ((Choose + choosej)->num < (Choose + choosej + 1)->num)
-			{
-				tempchoose.index = (Choose + choosej + 1)->index;
-				tempchoose.num = (Choose + choosej + 1)->num;
-				//tempchoose.sig = (Choose + choosej + 1)->sig;
-				(Choose + choosej + 1)->index = (Choose + choosej)->index;
-				(Choose + choosej + 1)->num = (Choose + choosej)->num;
-				//(Choose + choosej + 1)->sig = (Choose + choosej)->sig;
-				(Choose + choosej)->index = tempchoose.index;
-				(Choose + choosej)->num = tempchoose.num;
-				//(Choose + choosej)->sig = tempchoose.sig;
-			}
-		}
-	//for (choosei = 0; choosei < L->BoolNum; choosei++) printf("%d:%d\t", (Choose + choosei)->index, (Choose + choosei)->num);
+
 	start = clock();
 	if (status = dpll(L->VexList, 0, 0))
 	{
