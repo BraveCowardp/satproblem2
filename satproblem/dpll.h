@@ -16,6 +16,94 @@ int IfEmpty(Vexheadp p);
 void PutOut(Vexheadp p);
 void FreeMemory(Memoryp mmy);
 void SaveResult(char filename[], Listheadp L, long time);
+void CnfRead(char filename[], Listheadp L)
+{
+	FILE *fp;
+	int i,j,k, bool_num, line_num, TempIndex;
+	char ch;
+	char readline[200];
+	bool IfPCnf = false;
+	Vexheadp p, p1;
+	Vexp q, q1;
+	if ((fp = fopen(filename, "rb")) == NULL) {
+		printf("File open error.\n");
+	}
+	else
+	{
+		while (!feof(fp))
+		{
+			for (i = 0; i < 199; i++)
+			{
+				fread(&ch, sizeof(char), 1, fp);
+
+				if (ch != '\r') readline[i] = ch;
+				else i--;
+				if (readline[i] == '\n')
+				{
+					i++;
+					break;
+				}
+
+			}
+			readline[i] = '\0';
+			if (IfPCnf && j <= L->LineNum)
+			{
+				p = (Vexheadp)malloc(sizeof(Vexhead));
+				p->WhichLine = j++;
+				p->status = exist;
+				p->vexnum = 0;
+				p->NextLine = NULL;
+				k = 0;
+				while (true)
+				{
+					TempIndex = atoi(readline + k);
+					if (TempIndex == 0) break;
+					q = (Vexp)malloc(sizeof(Vex));
+					q->status = exist;
+					q->NextVexp = NULL;
+					p->vexnum++;
+					if (TempIndex < 0)
+					{
+						q->index = -TempIndex;
+						q->sig = -1;
+					}
+					else
+					{
+						q->index = TempIndex;
+						q->sig = 1;
+					}
+					if (k != 0)q1->NextVexp = q;
+					else p->FirstVex = q;
+					q->NextVexp = NULL;
+					q1 = q;
+					while (true)
+					{
+						k++;
+						if (readline[k] == ' ') break;
+					}
+				}
+				if (p->WhichLine != 1)p1->NextLine = p;
+				else L->VexList = p;
+				p->NextLine = NULL;
+				p1 = p;
+
+			}
+			if (!strncmp(parameter, readline, 5))
+			{
+				bool_num = atoi(readline + 5);
+				for (j = 0; readline[6 + j] != ' '; j++);
+				line_num = atoi(readline + 6 + j);
+				IfPCnf = true;
+				j = 1;
+				L->BoolNum = bool_num;
+				L->LineNum = line_num;
+
+			}
+
+		}
+	}
+	fclose(fp);
+}
 
 bool dpll(Vexheadp p, int index, int indexsig)
 {

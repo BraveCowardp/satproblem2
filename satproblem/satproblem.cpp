@@ -60,22 +60,24 @@ int choosep;
 int main()
 {
 	clock_t start, end;
-	FILE *fp;
+	//FILE *fp;
 	char filename[50]="tst_v25_c100.cnf";
-	char ch;
-	char readline[200];
-	int i, j, k, bool_num, line_num, TempIndex;
+	//char ch;
+	//char readline[200];
+	//int i, j, k, bool_num, line_num, TempIndex;
 	bool status;
-	char *readlinep;
+	//char *readlinep;
 	int choosei, choosej;
+	int i;
 	chooseList tempchoose;
 	Listheadp L = (Listheadp)malloc(sizeof(ListHead));
 	Vexheadp p, p1;
 	Vexp q,q1;
-	bool IfPCnf = false;
+	CnfRead(filename, L);
+	//bool IfPCnf = false;
 	//printf("input file name:");
 	//scanf("%s", filename, 50);
-	if ((fp = fopen(filename, "rb")) == NULL) {
+	/*if ((fp = fopen(filename, "rb")) == NULL) {
 		printf("File open error.\n");
 	}
 	else
@@ -152,7 +154,7 @@ int main()
 			
 		}
 	}
-	fclose(fp);
+	fclose(fp);*/
 	Choose = (chooseList*)malloc(2 * L->BoolNum * sizeof(chooseList));
 	for (choosei = 0; choosei < L->BoolNum; choosei++)
 	{
