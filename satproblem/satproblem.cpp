@@ -61,7 +61,7 @@ int main()
 {
 	clock_t start, end;
 	//FILE *fp;
-	char filename[50]="tst_v25_c100.cnf";
+	char filename[50]="eh-dp04s04.shuffled-1075.cnf";
 	//char ch;
 	//char readline[200];
 	//int i, j, k, bool_num, line_num, TempIndex;
@@ -104,20 +104,8 @@ int main()
 		printf("\n");
 		p = p->NextLine;
 	}
-
-	start = clock();
-	if (status = dpll(L->VexList, 0, 0))
-	{
-		printf("有解\n");
-	}
-	else
-	{
-		printf("无解\n");
-	}
-	end = clock();
-
-	printf("time=%ldms\n", end - start);
-	if(status) SaveResult(filename, L, end - start);
+	IndexSort(L);
+	Cnfsolve(L, filename);
 	return 0;
 }
 

@@ -18,6 +18,7 @@ int IfEmpty(Vexheadp p);
 void PutOut(Vexheadp p);
 void FreeMemory(Memoryp mmy);
 void SaveResult(char filename[], Listheadp L, long time);
+void Cnfsolve(Listheadp L, char filename[]);
 
 
 
@@ -357,5 +358,22 @@ void SaveResult(char filename[], Listheadp L, long time)
 		fclose(fp);
 	}
 }
+void Cnfsolve(Listheadp L,char filename[])
+{
+	bool status;
+	clock_t start, end;
+	start = clock();
+	if (status = dpll(L->VexList, 0, 0))
+	{
+		printf("有解\n");
+	}
+	else
+	{
+		printf("无解\n");
+	}
+	end = clock();
 
+	printf("time=%ldms\n", end - start);
+	if (status) SaveResult(filename, L, end - start);
+}
 #endif // !DPLL_H
