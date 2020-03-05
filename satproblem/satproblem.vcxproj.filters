@@ -24,6 +24,9 @@
     <ClInclude Include="dpll.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Binary Puzzle.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">

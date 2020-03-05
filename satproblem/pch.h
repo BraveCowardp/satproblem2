@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <Windows.h>
 #define parameter "p cnf"
 #define exist 1
 #define unexist 2
@@ -47,8 +48,13 @@ typedef struct ChooseList {
 	//int sig;
 }chooseList;
 extern int *IndexList;
+extern int *IndexList2;
 extern int IndexListp;
 extern chooseList* Choose;
 extern int choosep;
+extern int order;
+
+void setxy(int x, int y);
+
 
 #endif //PCH_H

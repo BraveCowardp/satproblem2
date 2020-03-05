@@ -1,84 +1,413 @@
 ﻿
 #include "pch.h"
 #include "dpll.h"
+#include "Binary Puzzle.h"
 
-//#include <time.h>
-//#define parameter "p cnf"
-//#define exist 1
-//#define unexist 2
-//#define _false 3
 
-//int finderror = 0;
-//
-//typedef struct Vex{
-//	int index;
-//	int sig;
-//	int status;
-//	struct Vex* NextVexp;
-//}Vex,*Vexp;
-//typedef struct Vexhead {
-//	int WhichLine;
-//	int status;
-//	int vexnum;
-//	int ForWhichIndex;
-//	int ForWhichSig;
-//	Vexp FirstVex;
-//	struct Vexhead *NextLine;
-//}Vexhead,*Vexheadp;
-//typedef struct {
-//	int LineNum;
-//	int BoolNum;
-//	Vexhead *VexList;
-//}ListHead,*Listheadp;
-//typedef struct memory {
-//	int index;
-//	int sig;
-//	struct memory *nextmmy;
-//}Memory,*Memoryp;
-//typedef struct ChooseList {
-//	int index;
-//	int num;
-//	//int sig;
-//}chooseList;
-//int *IndexList;
-//int IndexListp;
-//chooseList* Choose = NULL;
-//int choosep;
-//bool dpll(Vexheadp p, int index, int indexsig);
-//int IfExistSingleVex(Vexheadp p, int &sig);
-//void Simplify(Vexheadp p, int IfSingleIndex, int sig);
-//void Recover(Vexheadp p, Memoryp mmy);
-//int IfEmpty(Vexheadp p);
-//void PutOut(Vexheadp p);
-//void FreeMemory(Memoryp mmy);
-//void SaveResult(char filename[], Listheadp L, long time);
+void InitiIndexList(Listheadp L);
+void Cnfsolve(Listheadp L, char filename[]);
+char* BinaryPuzzle(void);
+void Putxy(int x, int y, int sig);
+void DigIndex(Listheadp L,char filename[]);
+void AutoSolve(Listheadp L, char filename[]);
+void DestoryListhead(Listheadp L);
+void RandomCreat(Listheadp L, char filename[]);
+void SelfSolve(int x, int y, int sig);
 
+int order;
 int *IndexList;
+int *IndexList2;
+int *IndexList3;
 int IndexListp;
 chooseList* Choose = NULL;
 int choosep;
 int main()
 {
-	clock_t start, end;
-	//FILE *fp;
-	char filename[50]="eh-dp04s04.shuffled-1075.cnf";
-	//char ch;
-	//char readline[200];
-	//int i, j, k, bool_num, line_num, TempIndex;
-	bool status;
-	//char *readlinep;
-	int choosei, choosej;
-	int i;
-	chooseList tempchoose;
-	Listheadp L = (Listheadp)malloc(sizeof(ListHead));
-	Vexheadp p, p1;
-	Vexp q,q1;
-	CnfRead(filename, L);
+	char filename[150];
+	int choosei, choice = -1, i, j, sig, tempsig, k, flag;
+	Listheadp L = NULL;
+	while (true)
+	{
+		system("cls");
+		setxy(15, 5);
+		printf("请输入你要进行的操作:");
+		setxy(17, 7);
+		printf("1.dpll解决sat问题");
+		setxy(17, 8);
+		printf("2.二进制数独游戏");
+		setxy(17, 9);
+		printf("0.退出");
+		do
+		{
+			setxy(36, 5);
+			scanf("%d", &choice);
+			setxy(36, 5);
+			printf(" ");
+		} while (choice != 0 && choice != 1 && choice != 2);
+		switch (choice)
+		{
+		case 0:
+			setxy(0, 5 + 10 + 2 * order);
+			printf("\n\n\n\n\n\n");
+			return 0;
+			break;
+		case 1:
+			system("cls");
+			setxy(15, 5);
+			printf("请输入同目录下cnf文件(包括扩展名):");
+			setxy(15, 6);
+			scanf("%s", filename, 150);
+			setxy(15, 7);
+			L = (Listheadp)malloc(sizeof(ListHead));
+			CnfRead(filename, L);
+			IndexList = (int*)malloc(L->BoolNum * sizeof(int));
+			for (IndexListp = 0; IndexListp < L->BoolNum; IndexListp++) *(IndexList + IndexListp) = 0;
+			IndexListp = 0;
+			InitiIndexList(L);
+			IndexSort(L);
+			Cnfsolve(L, filename);
+			getchar();
+			getchar();
+			break;
+		case 2:
 
-	//bool IfPCnf = false;
-	//printf("input file name:");
-	//scanf("%s", filename, 50);
+			system("cls");
+			setxy(15, 5);
+			order = 0;
+			printf("请输入阶数(大于2的偶数):");
+			while (order <= 2 || order % 2 != 0)
+			{
+				setxy(39, 5);
+				printf("                                             ");
+				setxy(39, 5);
+				scanf("%d", &order);
+
+			}
+		recreat:
+			system("cls");
+			board();
+
+			setxy(15 + 4 + 4 * order, 6);
+
+			strcpy(filename, BinaryPuzzle());
+			DestoryListhead(L);
+			L = (Listheadp)malloc(sizeof(ListHead));
+			CnfRead(filename, L);
+			IndexList = (int*)malloc(L->BoolNum * sizeof(int));
+			for (IndexListp = 0; IndexListp < L->BoolNum; IndexListp++) *(IndexList + IndexListp) = 0;
+			IndexList3 = (int*)malloc(order * order * sizeof(int));
+			for (IndexListp = 0; IndexListp < order*order; IndexListp++) *(IndexList3 + IndexListp) = 0;
+			IndexListp = 0;
+			InitiIndexList(L);
+			IndexSort(L);
+			//dpll(L->VexList, 0, 0);
+			RandomCreat(L, filename);
+			DigIndex(L, filename);
+
+			//SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED |FOREGROUND_GREEN |	FOREGROUND_BLUE);
+
+			for (i = 1; i <= order; i++)
+			{
+				for (j = 1; j <= order; j++)
+				{
+					if (*(IndexList2 + (i - 1)*order + j - 1) == 1)
+					{
+						sig = 1;
+						Putxy(j, i, sig);
+					}
+					else if (*(IndexList2 + (i - 1)*order + j - 1) == -1)
+					{
+						sig = 0;
+						Putxy(j, i, sig);
+					}
+
+				}
+			}
+			AutoSolve(L, filename);
+			board();
+			setxy(15 + 4 + 4 * order, 6);
+			printf("请输入(行 列 0/1):");
+			setxy(15 + 4 + 4 * order, 7);
+			printf("输入0 0 0以自动填补");
+			setxy(15 + 4 + 4 * order, 8);
+			printf("输入0 0 1以重新生成");
+			setxy(15 + 22 + 4 * order, 6);
+			while (true)
+			{
+				setxy(15 + 22 + 4 * order, 6);
+				scanf("%d %d %d", &i, &j, &sig);
+				setxy(15 + 22 + 4 * order, 6);
+				printf("                                                                    ");
+				setxy(15 + 22 + 4 * order, 6);
+				tempsig = 0;
+				flag = 0;
+				if (i <= order && i >= 1 && j <= order && j >= 1 && sig >= 0 && sig <= 1)
+				{
+
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_BLUE);
+					SelfSolve(i, j, sig);
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+
+					for (k = 0; k < order*order; k++)
+					{
+						//printf("%d ", *(IndexList2 + k));
+						if (*(IndexList2 + k) == 0 && ++flag&&*(IndexList3 + k) == *(IndexList + k))
+						{
+							++tempsig;
+						}
+					}
+					if (tempsig == flag)
+					{
+						setxy(15 + 22 + 4 * order, 6);
+						printf("恭喜完成!按任意键继续");
+						getchar();
+						getchar();
+						break;
+					}
+				}
+				else if (i == 0 && j == 0 && sig == 0)
+				{
+					board();
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_BLUE);
+
+					for (i = 1; i <= order; i++)
+					{
+						for (j = 1; j <= order; j++)
+						{
+							if (*(IndexList + (i - 1)*order + j - 1) == 1 && *(IndexList2 + (i - 1)*order + j - 1) == 0)
+							{
+								Sleep(50);
+								sig = 1;
+								Putxy(j, i, sig);
+								//setxy(15 + 22 + 4 * order, 6);
+							}
+							else if (*(IndexList + (i - 1)*order + j - 1) == -1 && *(IndexList2 + (i - 1)*order + j - 1) == 0)
+							{
+								Sleep(50);
+								sig = 0;
+								Putxy(j, i, sig);
+								//setxy(15 + 22 + 4 * order, 6);
+							}
+
+						}
+					}
+
+					SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+					board();
+					setxy(15 + 22 + 4 * order, 6);
+					printf("按任意键继续");
+					getchar();
+					getchar();
+					break;
+				}
+				else if (i == 0 && j == 0 && sig == 1)
+				{
+					goto recreat;
+				}
+			}
+
+
+
+
+			//Cnfsolve(L, filename);
+			break;
+		}
+
+	}
+
+
+
+	//Listheadp L = (Listheadp)malloc(sizeof(ListHead));
+	//CnfRead(filename, L);
+	//IndexList = (int*)malloc(L->BoolNum * sizeof(int));
+	//for (IndexListp = 0; IndexListp < L->BoolNum; IndexListp++) *(IndexList + IndexListp) = 0;
+	//IndexListp = 0;
+	//InitiIndexList(L);
+	//IndexSort(L);
+	//Cnfsolve(L, filename);
+	getchar();
+	getchar();
+	setxy(0, 5 + 10 + 2 * order);
+	printf("\n\n\n\n\n\n");
+	return 0;
+}
+void SelfSolve(int x,int y,int sig)
+{
+	int index;
+	index = (x - 1)*order + y;
+	if (*(IndexList2 + index - 1) == 0)
+	{
+		Putxy(y, x, sig);
+		if(sig==1) *(IndexList3 + index - 1) = sig;
+		else if(sig==0) *(IndexList3 + index - 1) = -1;
+	}
+}
+void RandomCreat(Listheadp L, char filename[])
+{
+	int i;
 	
+	{
+		
+		DestoryListhead(L);
+		//printf("ok");
+		CnfRead(filename, L);
+		for (i = 0; i < L->BoolNum; i++)
+		{
+			*(IndexList + i) = 0;
+		}
+		
+		for (i = 0; i < 4; i++)
+		{
+			srand((unsigned)time(NULL));
+			if (rand() % 2 == 1) *(IndexList + rand() % (order*order)) = 1;
+			else *(IndexList + rand() % (order*order)) = -1;
+
+		}
+	} while (dpll(L->VexList, 0, 0) == false);
+	
+}
+void AutoSolve(Listheadp L, char filename[])
+{
+	int i, j, sig;
+	CnfRead(filename, L);
+	for (IndexListp = 0; IndexListp < L->BoolNum; IndexListp++) *(IndexList + IndexListp) = *(IndexList2 + IndexListp);
+	//for (IndexListp = 0; IndexListp < L->BoolNum; IndexListp++) *(IndexList2 + IndexListp) = 0;
+	IndexListp = 0;
+	InitiIndexList(L);
+	IndexSort(L);
+	dpll(L->VexList, 0, 0);
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_BLUE);
+
+	//for (i = 1; i <= order; i++)
+	//{
+	//	for (j = 1; j <= order; j++)
+	//	{
+	//		if (*(IndexList + (i - 1)*order + j - 1) == 1 && *(IndexList2 + (i - 1)*order + j - 1) == 0)
+	//		{
+	//			sig = 1;
+	//			Putxy(j, i, sig);
+	//		}
+	//		else if (*(IndexList + (i - 1)*order + j - 1) == -1 && *(IndexList2 + (i - 1)*order + j - 1) == 0)
+	//		{
+	//			sig = 0;
+	//			Putxy(j, i, sig);
+	//		}
+
+	//	}
+	//}
+
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+}
+void DigIndex(Listheadp L,char filename[])
+{
+	int i,j,tempsig ,pick, temp;
+	int *randlist = (int *)malloc(order*order * sizeof(int));
+	srand((unsigned)time(NULL));
+	for (i = 0; i < order*order; i++)
+	{
+		randlist[i] = i + 1;
+	}
+	for (i = 0; i < order*order; i++)
+	{
+		pick = rand() % (order*order - i) + i;
+		temp = randlist[i];
+		randlist[i] = randlist[pick];
+		randlist[pick] = temp;
+	}
+	//setxy(0, 0);
+	//for (i = 0; i < order*order; i++) printf("%d ", randlist[i]);
+	IndexList2 = (int *)malloc(L->BoolNum * sizeof(int));
+	for (i = 0; i < L->BoolNum; i++)
+	{
+		*(IndexList2 + i) = 0;
+	}
+	for (i = 0; i < order*order; i++)
+	{
+		*(IndexList2 + i) = *(IndexList + i);
+	}
+	for (i = 0; i < order*order; i++)
+	{
+		tempsig = *(IndexList2 + randlist[i]);
+		*(IndexList2 + randlist[i]) = -1 * tempsig;
+		//setxy(3, i);
+		//printf("%d", *(IndexList2 + i));
+		for (j = 0; j < L->BoolNum; j++)
+		{
+			*(IndexList + j) = *(IndexList2 + j);
+
+		}
+		DestoryListhead(L);
+		CnfRead(filename, L);
+		if (dpll(L->VexList, 0, 0)) *(IndexList2 + randlist[i]) = tempsig;
+		else *(IndexList2 + randlist[i]) = 0;
+
+		//setxy(0, i);
+		//printf("%d", *(IndexList2 + i));
+	}
+}
+void DestoryListhead(Listheadp L)
+{
+	Vexheadp p,p1;
+	Vexp q,q1;
+	if (L != NULL)
+	{
+		for (p = L->VexList; p != NULL;)
+		{
+			for (q = p->FirstVex; q != NULL; )
+			{
+				q1 = q->NextVexp;
+				free(q);
+				q = q1;
+			}
+			p1 = p->NextLine;
+			free(p);
+			p = p1;
+		}
+		//free(L);
+	}
+	//L = NULL;
+}
+void Putxy(int x, int y, int sig)
+{
+	setxy(15 + 4 * x - 2, 5 + 2 * y - 1);
+	printf("%d", sig);
+}
+char* BinaryPuzzle(void)
+{
+	int index, line;
+	FILE *fp;
+	int i, j, three;
+	char filename[50] = "cnf_";
+	char length[3];
+	int combonum = comboNum();
+	int combonum2 = comboNum2();
+
+	_itoa(order, length, 10);
+	strcat(filename, length);
+	strcat(filename, ".cnf");
+	if ((fp = fopen(filename, "r")) == NULL)
+	{
+		if ((fp = fopen(filename, "wb")) == NULL) {
+			printf("File open error.\n");
+
+		}
+		else
+		{
+			ruler1(fp);
+				for (line = 1; line <= order; line++) ruler2(order, order / 2 + 1, 1, 1, line, fp);
+				ruler3(fp);
+		}
+		
+	}
+	fclose(fp);
+	return filename;
+}
+void InitiIndexList(Listheadp L)
+{
+	Vexheadp p;
+	Vexp q;
+	int i,choosei;
+	p = L->VexList;
 	Choose = (chooseList*)malloc(L->BoolNum * sizeof(chooseList));
 	for (choosei = 0; choosei < L->BoolNum; choosei++)
 	{
@@ -86,254 +415,47 @@ int main()
 		(Choose + choosei)->num = 0;
 
 	}
-	IndexList = (int*)malloc(L->BoolNum * sizeof(int));
-	for (IndexListp = 0; IndexListp < L->BoolNum; IndexListp++) *(IndexList + IndexListp) = 0;
-	IndexListp = 0;
-	p = L->VexList;
 	for (i = 0; i < L->LineNum; i++)
 	{
 		q = p->FirstVex;
 		while (true)
 		{
-			printf("%d\t", q->index * q->sig);
+			//printf("%d\t", q->index * q->sig);
 			if (q->sig == 1) (Choose + q->index - 1)->num++;
 
 			q = q->NextVexp;
 			if (!q) break;
 		}
-		printf("\n");
+		//printf("\n");
 		p = p->NextLine;
 	}
-	IndexSort(L);
-	Cnfsolve(L, filename);
-	return 0;
+}
+void Cnfsolve(Listheadp L, char filename[])
+{
+	bool status;
+	clock_t start, end;
+	setxy(15, 7);
+	start = clock();
+	if (status = dpll(L->VexList, 0, 0))
+	{
+		printf("有解\n");
+	}
+	else
+	{
+		printf("无解\n");
+	}
+	end = clock();
+	setxy(15, 8);
+	printf("time=%ldms\n", end - start);
+
+	SaveResult(filename, L, end - start, status);
 }
 
-//bool dpll(Vexheadp p, int index, int indexsig)
-//{
-//	int IfSingleIndex;
-//	int sig;
-//	int i = 0, j = 0;
-//	Memoryp mmy=NULL,mmy1=NULL;
-//	if (index != 0)
-//	{
-//		IfSingleIndex = index;
-//		sig = indexsig;
-//		mmy = (Memoryp)malloc(sizeof(Memory));
-//		mmy->index = IfSingleIndex;
-//		mmy->sig = sig;
-//		mmy->nextmmy = mmy1;
-//		mmy1 = mmy;
-//		*(IndexList + IfSingleIndex - 1) = sig;
-//		//printf("index:%d sig:%d i:%d\t", IfSingleIndex, sig, i);
-//		Simplify(p, IfSingleIndex, sig);
-//		//PutOut(p);
-//		//printf("\n\n");
-//		if (IfEmpty(p) == 1) return true;
-//		else if (IfEmpty(p) == 3)
-//		{
-//
-//			Recover(p, mmy);
-//			//PutOut(p);
-//			//printf("\n\n");
-//			FreeMemory(mmy);
-//			return false;
-//		}
-//	}
-//	
-//
-//	while(IfSingleIndex = IfExistSingleVex(p, sig))
-//	{
-//		
-//		//printf("index:%d sig:%d i:%d\t", IfSingleIndex, sig, i);
-//		//PutOut(p);
-//		//printf("\n\n")
-//		if (IfSingleIndex == 0) break;
-//		mmy = (Memoryp)malloc(sizeof(Memory));
-//		mmy->index = IfSingleIndex;
-//		mmy->sig = sig;
-//		mmy->nextmmy = mmy1;
-//		mmy1 = mmy;
-//
-//		*(IndexList + IfSingleIndex - 1) = sig;
-//		//printf("index:%d sig:%d i:%d\t", IfSingleIndex, sig, i);
-//		Simplify(p, IfSingleIndex, sig);
-//		//PutOut(p);
-//		//printf("\n\n");
-//		if (IfEmpty(p)==1) return true;
-//		else if (IfEmpty(p) == 3)
-//		{
-//
-//			Recover(p, mmy);
-//			//PutOut(p);
-//			//printf("\n\n");
-//			FreeMemory(mmy);
-//			return false;
-//		}
-//		
-//	}
-//	//for (; *(IndexList + j) != 0; j++);
-//	for (; *(IndexList + (Choose + j)->index - 1) != 0; j++) ;
-//
-//	index = (Choose + j)->index;
-//	sig = 1;
-//	*(IndexList + (Choose + j)->index - 1) = sig;
-//	if (dpll(p, index, sig)) return true;
-//	sig = -1;
-//	*(IndexList + (Choose + j)->index - 1) = sig;
-//	if (dpll(p, index, sig)) return true;
-//	Recover(p,mmy);
-//	//PutOut(p);
-//	//printf("\n\n");
-//	FreeMemory(mmy);
-//	return false;
-//}
-//int IfExistSingleVex(Vexheadp p,int &sig)
-//{
-//	Vexp q;
-//	for (; p != NULL; p = p->NextLine)
-//		if (p->status==exist && p->vexnum == 1)
-//		{
-//			for (q = p->FirstVex; q != NULL; q = q->NextVexp)
-//				if (q->status == exist)
-//				{
-//					sig = q->sig;
-//					return q->index;
-//				}
-//		}
-//	return 0;
-//}
-//void Simplify(Vexheadp p,int IfSingleIndex, int sig)
-//{
-//	Vexp q;
-//	for (; p != NULL; p = p->NextLine)
-//	{
-//		if (p->status == exist)
-//		{
-//			for (q = p->FirstVex; q != NULL; q = q->NextVexp)
-//			{
-//				if (q->status == exist && q->index == IfSingleIndex && q->sig == sig)
-//				{
-//					p->status = unexist;
-//					p->ForWhichIndex = IfSingleIndex;
-//					p->ForWhichSig = sig; 
-//
-//				}
-//				
-//			}
-//				
-//		}
-//		if (p->status == exist)
-//		{
-//			for (q = p->FirstVex; q != NULL; q = q->NextVexp)
-//			{
-//				if (q->status == exist && q->index == IfSingleIndex && q->sig == -sig)
-//				{
-//					q->status = unexist;
-//					p->vexnum--;
-//				}
-//
-//			}
-//
-//		}
-//		
-//	}
-//}
-//void Recover(Vexheadp p, Memoryp mmy)
-//{
-//	Vexheadp p1;
-//	Vexp q;
-//	for (; mmy != NULL; mmy = mmy->nextmmy)
-//	{
-//		for (p1 = p; p1 != NULL; p1 = p1->NextLine)
-//		{
-//			if (p1->status == exist)
-//			{
-//				for (q = p1->FirstVex; q != NULL; q = q->NextVexp)
-//					if (q->status == unexist && q->index == mmy->index && q->sig == -mmy->sig)
-//					{
-//						q->status = exist;
-//						p1->vexnum++;
-//					}
-//			}
-//			if (p1->status == unexist && p1->ForWhichIndex == mmy->index && p1->ForWhichSig == mmy->sig) p1->status = exist;
-//			
-//		}
-//		*(IndexList + mmy->index - 1) = 0;
-//	}
-//}
-//int IfEmpty(Vexheadp p)
-//{
-//	int sign = 0;
-//	for (; p != NULL; p = p->NextLine)
-//	{
-//		if (p->status == exist)
-//		{
-//			if (p->vexnum == 0)
-//			{
-//				//printf("finderror3!");
-//				return 3;
-//			}
-//			else
-//			{
-//				sign = 1;
-//			}
-//		}
-//	}
-//	if(sign == 0)return 1;
-//	else return 2;
-//}
-//void PutOut(Vexheadp p)
-//{
-//	int i;
-//	Vexp q;
-//	for (; p!=NULL; )
-//	{
-//		q = p->FirstVex;
-//		while (p->status==exist)
-//		{
-//			if (q->status == exist)printf("%d\t", q->index * q->sig);
-//			q = q->NextVexp;
-//			if (!q) break;
-//			if (p->vexnum == 0) printf("finderror!");
-//		}
-//		if(p->status == exist) printf("\n");
-//		p = p->NextLine;
-//	}
-//}
-//void FreeMemory(Memoryp mmy)
-//{
-//	Memoryp mmy1;
-//	for (; mmy != NULL;)
-//	{
-//		mmy1 = mmy;
-//		mmy = mmy->nextmmy;
-//		free(mmy1);
-//	}
-//}
-//void SaveResult(char filename[], Listheadp L,long time)
-//{
-//	FILE *fp;
-//	int i = 0;
-//	char road[100] = "./result/";
-//	strcat(road, filename);
-//	strcat(road, ".res");
-//	if ((fp = fopen(road, "wb+")) == NULL) {
-//		printf("SaveResult file open error.\n");
-//	}
-//	else
-//	{
-//		fprintf(fp, "time:%ldms\r\n", time);
-//		while (i < L->BoolNum)
-//		{
-//			fprintf(fp, "%d:%d\t", i + 1, *(IndexList + i));
-//			i++;
-//			if (i % 6 == 0) fprintf(fp, "\r\n");
-//		}
-//		
-//		fclose(fp);
-//	}
-//}
+
+
+
+
+
 
 
 

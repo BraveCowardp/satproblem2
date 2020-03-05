@@ -17,8 +17,11 @@ void Recover(Vexheadp p, Memoryp mmy);
 int IfEmpty(Vexheadp p);
 void PutOut(Vexheadp p);
 void FreeMemory(Memoryp mmy);
-void SaveResult(char filename[], Listheadp L, long time);
-void Cnfsolve(Listheadp L, char filename[]);
+void SaveResult(char filename[], Listheadp L, long time, int status);
+
+
+extern int *IndexList;
+extern int IndexListp;
 
 
 
@@ -139,6 +142,10 @@ bool dpll(Vexheadp p, int index, int indexsig)
 	int sig;
 	int i = 0, j = 0;
 	Memoryp mmy = NULL, mmy1 = NULL;
+	for (i = 0; i < order *order; i++)
+	{
+		if (*(IndexList + i) != 0) Simplify(p, i + 1, *(IndexList + i));
+	}
 	if (index != 0)
 	{
 		IfSingleIndex = index;
@@ -335,45 +342,45 @@ void FreeMemory(Memoryp mmy)
 		free(mmy1);
 	}
 }
-void SaveResult(char filename[], Listheadp L, long time)
+void SaveResult(char filename[], Listheadp L, long time, int status)
 {
 	FILE *fp;
-	int i = 0;
-	char road[100] = "./result/";
-	strcat(road, filename);
-	strcat(road, ".res");
+	int i = 0, j;
+	char road[150];
+	strcpy(road, filename);
+	for (j = 0; j < 150; j++)
+		if (road[j] == '.')
+		{
+			road[j+1] = 'r';
+			road[j + 2] = 'e';
+			road[j + 3] = 's';
+		}
+	//strcat(road, ".res");
 	if ((fp = fopen(road, "wb+")) == NULL) {
 		printf("SaveResult file open error.\n");
 	}
 	else
 	{
-		fprintf(fp, "time:%ldms\r\n", time);
-		while (i < L->BoolNum)
+		fprintf(fp, "s %d\r\n", status);
+		if (status)
 		{
-			fprintf(fp, "%d:%d\t", i + 1, *(IndexList + i));
-			i++;
-			if (i % 6 == 0) fprintf(fp, "\r\n");
+			fprintf(fp, "v ");
+			while (i < L->BoolNum)
+			{
+				fprintf(fp, "%d ", *(IndexList + i) * (i+1));
+				i++;
+			}
+			fprintf(fp, "\r\n");
 		}
+		fprintf(fp, "t %ld\r\n", time);
 
 		fclose(fp);
 	}
+	setxy(15, 9);
+	printf("结果已保存到同目录下%s文件", road);
+	setxy(15, 10);
+	printf("按任意键继续");
+	setxy(15, 11);
 }
-void Cnfsolve(Listheadp L,char filename[])
-{
-	bool status;
-	clock_t start, end;
-	start = clock();
-	if (status = dpll(L->VexList, 0, 0))
-	{
-		printf("有解\n");
-	}
-	else
-	{
-		printf("无解\n");
-	}
-	end = clock();
 
-	printf("time=%ldms\n", end - start);
-	if (status) SaveResult(filename, L, end - start);
-}
 #endif // !DPLL_H
